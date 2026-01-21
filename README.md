@@ -1,4 +1,4 @@
-# Wolframe Spotify Canvas (v1.0.0-dev)
+# Wolframe Spotify Canvas
 
 <div align="center">
 

@@ -17,7 +17,9 @@ async fn main() -> Result<()> {
             eprintln!("   4. Filter for 'pathfinder'.");
             eprintln!("   5. Click any request, go to 'Headers' -> 'Request Headers'.");
             eprintln!("   6. Copy the 'authorization' header (starts with 'Bearer ...').");
-            eprintln!("   7. Run: $env:SPOTIFY_TOKEN='...' ; cargo run --example simple (PowerShell)");
+            eprintln!(
+                "   7. Run: $env:SPOTIFY_TOKEN='...' ; cargo run --example simple (PowerShell)"
+            );
             return Ok(());
         }
     };

@@ -50,7 +50,7 @@ struct GrantedToken {
 
 impl TokenManager {
     pub fn new() -> Self {
-        Self { 
+        Self {
             client_token: None,
             expires_at: None,
         }
@@ -61,7 +61,7 @@ impl TokenManager {
     #[tracing::instrument(level = "debug", skip(self, client), fields(expires_in = tracing::field::Empty))]
     pub async fn get_token(&mut self, client: &Client) -> Result<String> {
         if self.is_token_valid() {
-             return Ok(self.client_token.as_ref().unwrap().clone());
+            return Ok(self.client_token.as_ref().unwrap().clone());
         }
 
         tracing::debug!("Client token expired or missing, refreshing...");
@@ -99,20 +99,24 @@ impl TokenManager {
         }
 
         let token_res: ClientTokenResponse = response.json().await?;
-        
+
         self.client_token = Some(token_res.granted_token.token.clone());
-        
+
         // Expire 60 seconds before actual expiry to be safe
-        let secs = token_res.granted_token.expires_after_seconds.saturating_sub(60);
+        let secs = token_res
+            .granted_token
+            .expires_after_seconds
+            .saturating_sub(60);
         self.expires_at = Some(Instant::now() + Duration::from_secs(secs));
 
         // Record the actual expiry into the current span
-        tracing::Span::current().record("expires_in", token_res.granted_token.expires_after_seconds);
+        tracing::Span::current()
+            .record("expires_in", token_res.granted_token.expires_after_seconds);
         tracing::debug!("Refreshed client-token");
 
         Ok(token_res.granted_token.token)
     }
-    
+
     fn is_token_valid(&self) -> bool {
         match (&self.client_token, &self.expires_at) {
             (Some(_), Some(exp)) => Instant::now() < *exp,

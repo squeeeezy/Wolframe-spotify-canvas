@@ -1,4 +1,4 @@
-# 🦀 wolframe-spotify-canvas
+# Wolframe Spotify Canvas
 
 [![Crates.io](https://img.shields.io/crates/v/wolframe-spotify-canvas.svg)](https://crates.io/crates/wolframe-spotify-canvas)
 [![Documentation](https://docs.rs/wolframe-spotify-canvas/badge.svg)](https://docs.rs/wolframe-spotify-canvas)

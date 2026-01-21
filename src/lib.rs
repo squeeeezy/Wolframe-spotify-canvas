@@ -10,7 +10,8 @@ use token::TokenManager;
 /// Default GraphQL endpoint for Spotify Pathfinder API.
 pub const DEFAULT_PATHFINDER_URL: &str = "https://api-partner.spotify.com/pathfinder/v2/query";
 /// Known working hash for the Canvas operation (as of Jan 2026).
-pub const DEFAULT_CANVAS_HASH: &str = "575138ab27cd5c1b3e54da54d0a7cc8d85485402de26340c2145f0f6bb5e7a9f";
+pub const DEFAULT_CANVAS_HASH: &str =
+    "575138ab27cd5c1b3e54da54d0a7cc8d85485402de26340c2145f0f6bb5e7a9f";
 pub const DEFAULT_OPERATION_NAME: &str = "canvas";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -82,7 +83,10 @@ impl CanvasClient {
         tracing::debug!("Starting canvas fetch");
 
         // 1. Ensure we have a valid client-token
-        let client_token = self.token_manager.get_token(&self.http).await
+        let client_token = self
+            .token_manager
+            .get_token(&self.http)
+            .await
             .map_err(|e| {
                 tracing::error!(error = %e, "Failed to get client-token");
                 e
@@ -126,7 +130,7 @@ impl CanvasClient {
             .await?;
 
         let status = response.status();
-        
+
         // Handle Rate Limiting (429)
         // Handle Rate Limiting (429)
         if status == reqwest::StatusCode::TOO_MANY_REQUESTS {
@@ -136,7 +140,7 @@ impl CanvasClient {
                 .and_then(|v| v.to_str().ok())
                 .and_then(|s| s.parse::<u64>().ok())
                 .map(|s| s * 1000); // convert to ms
-            
+
             tracing::warn!(retry_after = ?retry_after, "Rate limited by Spotify API");
             return Err(CanvasError::RateLimited { retry_after });
         }
@@ -151,7 +155,7 @@ impl CanvasClient {
         }
 
         let body_text = response.text().await?;
-        
+
         // 5. Parse Response
         let graph_response: GraphResponse = serde_json::from_str(&body_text)?;
 
@@ -165,24 +169,24 @@ impl CanvasClient {
             Some(cd) => {
                 if let Some(url) = cd.url {
                     tracing::info!(track_uri = %track_uri, canvas_url = %url, "Canvas fetched successfully");
-                     Ok(Canvas {
+                    Ok(Canvas {
                         mp4_url: url,
                         uri: cd.uri,
                         track_uri: track_uri.to_string(),
                     })
                 } else if let Some(uri) = cd.uri {
-                     // Sometimes only URI is returned (rare)
-                     tracing::warn!(track_uri = %track_uri, uri = %uri, "Canvas found but no URL");
-                     Err(CanvasError::NotFound(track_uri.to_string()))
+                    // Sometimes only URI is returned (rare)
+                    tracing::warn!(track_uri = %track_uri, uri = %uri, "Canvas found but no URL");
+                    Err(CanvasError::NotFound(track_uri.to_string()))
                 } else {
-                     tracing::warn!(track_uri = %track_uri, "Canvas object empty");
-                     Err(CanvasError::NotFound(track_uri.to_string()))
+                    tracing::warn!(track_uri = %track_uri, "Canvas object empty");
+                    Err(CanvasError::NotFound(track_uri.to_string()))
                 }
             }
             None => {
                 tracing::debug!(track_uri = %track_uri, "No canvas entry in response");
                 Err(CanvasError::NotFound(track_uri.to_string()))
-            },
+            }
         }
     }
 }
