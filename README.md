@@ -12,7 +12,7 @@
 [English](README.md) | [Русский](README_RU.md)
 
 </div>
-This Rust library reverse-engineers the internal **Spotify GraphQL Pathfinder API** used by the official Spotify Web Player. It replaces the deprecated and non-functional REST API endpoints (`canvaz-cache`).
+This Rust library reverse-engineers the internal Spotify GraphQL Pathfinder API used by the official Spotify Web Player. It replaces the deprecated and non-functional REST API endpoints (`canvaz-cache`).
 
 ---
 
