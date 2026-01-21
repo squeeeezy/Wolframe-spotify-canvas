@@ -22,6 +22,11 @@ jobs:
           toolchain: 1.75.0  # MSRV check
           components: clippy, rustfmt
 
+      - name: Downgrade dependencies for MSRV
+        run: |
+          cargo generate-lockfile
+          cargo update -p idna --precise 1.0.3
+
       - name: Rustfmt
         run: cargo fmt --all -- --check
 
