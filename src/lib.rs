@@ -40,6 +40,7 @@ impl Default for CanvasConfig {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct CanvasClient {
     http: reqwest::Client,
     token_manager: TokenManager,
