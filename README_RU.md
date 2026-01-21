@@ -8,7 +8,7 @@
 
 Эта Rust-библиотека основана на реверс-инжиниринге внутреннего **Spotify GraphQL Pathfinder API**, который используется официальным веб-плеером. Она заменяет старые и нерабочие REST API эндпоинты (`canvaz-cache`).
 
-[🇬🇧 Read in English / Читать на английском](README.md)
+[Read in English / Читать на английском](README.md)
 
 ---
 
@@ -25,35 +25,44 @@
 
 ```toml
 [dependencies]
-wolframe-spotify-canvas = "0.1.0"
+wolframe-spotify-canvas = "1.0.0"
 tokio = { version = "1", features = ["full", "macros"] }
 ```
+
+### Минимальная версия Rust (MSRV)
+Для работы требуется Rust 1.75 или выше.
+
+
 
 ## ⚡ Использование
 
 ```rust
-use wolframe_spotify_canvas::{CanvasClient, Result};
+use wolframe_spotify_canvas::{CanvasClient, CanvasError};
+use std::env;
 
 #[tokio::main]
-async fn main() -> Result<()> {
-    // 1. Инициализируем клиент (client-token управляется автоматически)
-    let mut client = CanvasClient::new();
-    
-    // 2. Вам нужен валидный Spotify Access Token (Bearer)
-    // Можно получить через SP_DC (librespot) или через OAuth.
-    let access_token = "ВАШ_ACCESS_TOKEN";
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // 1. Получите валидный Spotify Access Token (Bearer)
+    //    Можно взять из Network Tab веб-плеера Spotify (Authorization: Bearer ...)
+    let access_token = env::var("SPOTIFY_TOKEN").expect("SPOTIFY_TOKEN not set");
 
-    // 3. Получаем Canvas
-    let track_uri = "spotify:track:4cOdK2wGLETKBW3PvgPWqT"; // Glimpse of Us
-    
-    match client.get_canvas(track_uri, access_token).await {
+    // 2. Инициализация клиента (теперь поддерживает shared reqwest::Client)
+    let mut client = CanvasClient::new();
+
+    // 3. URI трека (например, "KORE" by Zynyx)
+    let track_uri = "spotify:track:72Xn6x8xqegX64AKeJDsZt";
+
+    println!("Получение canvas для: {}", track_uri);
+
+    // 4. Запрос
+    match client.get_canvas(track_uri, &access_token).await {
         Ok(canvas) => {
-            println!("🎥 Canvas найден!");
-            println!("MP4 URL: {}", canvas.mp4_url);
+            println!("URL видео: {}", canvas.mp4_url);
         }
-        Err(e) => {
-            eprintln!("❌ Ошибка: {}", e);
+        Err(CanvasError::RateLimited { retry_after }) => {
+            eprintln!("Rate limit! Повторите через {:?} мс", retry_after);
         }
+        Err(e) => eprintln!("Ошибка: {}", e),
     }
 
     Ok(())
@@ -61,6 +70,25 @@ async fn main() -> Result<()> {
 ```
 
 Смотрите `examples/simple.rs` для полного примера.
+
+## 🔍 Observability (Наблюдаемость)
+
+Библиотека использует [`tracing`](https://docs.rs/tracing) для структурированного логирования.
+
+### Уровни логов (Log Levels)
+- `INFO` — Получение Canvas и успешные операции (по умолчанию)
+- `DEBUG` — Внутренняя работа с токенами
+- `TRACE` — Генерация Device ID, низкоуровневые детали
+
+### Пример настройки
+```rust
+tracing_subscriber::fmt()
+    .with_env_filter("wolframe_spotify_canvas=debug")
+    .init();
+```
+
+### Интеграция с OpenTelemetry
+Спаны (spans) автоматически передаются в системы распределенной трассировки (Jaeger, Datadog) при использовании `tracing-opentelemetry`.
 
 ---
 

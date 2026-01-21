@@ -2,6 +2,7 @@ use crate::error::{CanvasError, Result};
 use rand::Rng;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use std::time::{Duration, Instant};
 
 const CLIENT_TOKEN_URL: &str = "https://clienttoken.spotify.com/v1/clienttoken";
 // This is the known client ID for the Spotify Web Player, widely used for this workaround.
@@ -10,6 +11,7 @@ const WEB_PLAYER_CLIENT_ID: &str = "d8a5ed958d274c2e8ee717e6a4b0971d";
 #[derive(Debug, Clone)]
 pub struct TokenManager {
     client_token: Option<String>,
+    expires_at: Option<Instant>,
 }
 
 #[derive(Serialize)]
@@ -43,23 +45,26 @@ struct ClientTokenResponse {
 struct GrantedToken {
     token: String,
     #[allow(dead_code)]
-    expires_after_seconds: i64,
+    expires_after_seconds: u64,
 }
 
 impl TokenManager {
     pub fn new() -> Self {
-        Self { client_token: None }
+        Self { 
+            client_token: None,
+            expires_at: None,
+        }
     }
 
     /// Fetches a new client-token from Spotify.
     /// This is required for the Pathfinder GraphQL API.
+    #[tracing::instrument(level = "debug", skip(self, client), fields(expires_in = tracing::field::Empty))]
     pub async fn get_token(&mut self, client: &Client) -> Result<String> {
-        if let Some(token) = &self.client_token {
-            // In a real implementation, check expiry. For now, we return cached if present.
-            // TODO: Implement expiry check
-            return Ok(token.clone());
+        if self.is_token_valid() {
+             return Ok(self.client_token.as_ref().unwrap().clone());
         }
 
+        tracing::debug!("Client token expired or missing, refreshing...");
         let device_id = generate_device_id();
 
         let request_body = ClientTokenRequest {
@@ -94,17 +99,35 @@ impl TokenManager {
         }
 
         let token_res: ClientTokenResponse = response.json().await?;
+        
         self.client_token = Some(token_res.granted_token.token.clone());
+        
+        // Expire 60 seconds before actual expiry to be safe
+        let secs = token_res.granted_token.expires_after_seconds.saturating_sub(60);
+        self.expires_at = Some(Instant::now() + Duration::from_secs(secs));
+
+        // Record the actual expiry into the current span
+        tracing::Span::current().record("expires_in", token_res.granted_token.expires_after_seconds);
+        tracing::debug!("Refreshed client-token");
 
         Ok(token_res.granted_token.token)
     }
     
+    fn is_token_valid(&self) -> bool {
+        match (&self.client_token, &self.expires_at) {
+            (Some(_), Some(exp)) => Instant::now() < *exp,
+            _ => false,
+        }
+    }
+
     #[allow(dead_code)]
-    pub fn set_token(&mut self, token: String) {
+    pub fn set_token(&mut self, token: String, expires_in: u64) {
         self.client_token = Some(token);
+        self.expires_at = Some(Instant::now() + Duration::from_secs(expires_in.saturating_sub(60)));
     }
 }
 
+#[tracing::instrument(level = "trace")]
 fn generate_device_id() -> String {
     let random_bytes: Vec<u8> = (0..16).map(|_| rand::thread_rng().gen()).collect();
     hex::encode(random_bytes)
