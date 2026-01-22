@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2026-01-22
+
+### Changed
+- **MSRV:** Updated Minimum Supported Rust Version from 1.75 to **1.80** (required by `native-tls` 0.2.14+).
+- **CI:** Removed obsolete dependency downgrades, simplified workflow.
+- **Docs:** Unified README styling, synced Russian translation.
+
+## [1.0.2] - 2026-01-21
+
+### Added
+- **Docs:** Comprehensive RustDoc comments (`///`) for all public API methods (`CanvasClient`, `get_canvas`, etc.).
+
 ## [1.0.1] - 2026-01-21
 
 ### Fixed
@@ -21,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Resilience:** Handling of `429 Too Many Requests` with `Retry-After` header parsing.
 - **Error Handling:** `CanvasError` is now `#[non_exhaustive]` to allow future extensions without breaking changes.
 - **CI/CD:** GitHub Actions workflow for automated testing and SemVer checks.
-- **MSRV:** Minimum Supported Rust Version policy set to **1.75**.
+- **MSRV:** Minimum Supported Rust Version policy set to **1.80**.
 
 ### Changed
 - **Breaking:** `get_canvas` signature now returns a Result with rich `CanvasError` enum instead of a generic error.

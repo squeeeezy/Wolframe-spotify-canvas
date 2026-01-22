@@ -41,6 +41,9 @@ impl Default for CanvasConfig {
     }
 }
 
+/// The main client for interacting with Spotify's private Canvas API.
+///
+/// Handles authentication (client-token exchange) and GraphQL queries internally.
 #[derive(Debug, Clone)]
 pub struct CanvasClient {
     http: reqwest::Client,
@@ -49,12 +52,12 @@ pub struct CanvasClient {
 }
 
 impl CanvasClient {
-    /// Create a new CanvasClient with default configuration and a new Reqwest client.
+    /// Create a new `CanvasClient` with default configuration and a new `reqwest::Client`.
     pub fn new() -> Self {
         Self::with_config(CanvasConfig::default())
     }
 
-    /// Create a new CanvasClient with a custom configuration.
+    /// Create a new `CanvasClient` with a custom configuration.
     pub fn with_config(config: CanvasConfig) -> Self {
         Self {
             http: reqwest::Client::new(),
@@ -63,7 +66,9 @@ impl CanvasClient {
         }
     }
 
-    /// Create a new CanvasClient using an existing Reqwest client (shared).
+    /// Creates a new `CanvasClient` using an existing `reqwest::Client`.
+    ///
+    /// Useful if you want to share a connection pool or proxy configuration.
     pub fn with_client(client: reqwest::Client, config: CanvasConfig) -> Self {
         Self {
             http: client,
@@ -78,6 +83,31 @@ impl CanvasClient {
     ///
     /// * `track_uri` - The Spotify Track URI (e.g., "spotify:track:...")
     /// * `access_token` - A valid Spotify Access Token (Bearer).
+    /// Fetches the Spotify Canvas (looping video) for a given track URI.
+    ///
+    /// # Arguments
+    ///
+    /// * `track_uri` - The Spotify URI of the track (e.g., `"spotify:track:..."`).
+    /// * `access_token` - A valid Spotify Web Player access token (starts with `Bearer ...`).
+    ///
+    /// # Errors
+    ///
+    /// Returns a `CanvasError` if:
+    /// * The `access_token` is invalid or expired (`CanvasError::TokenExpired`).
+    /// * The track has no canvas (`CanvasError::NotFound`).
+    /// * Rate limited by Spotify (`CanvasError::RateLimited`).
+    /// * Network or parsing errors occur.
+    ///
+    /// # Example
+    ///
+    /// ```rust,no_run
+    /// # async fn run() -> Result<(), Box<dyn std::error::Error>> {
+    /// # let mut client = wolframe_spotify_canvas::CanvasClient::new();
+    /// let canvas = client.get_canvas("spotify:track:...", "Bearer ...").await?;
+    /// println!("Canvas URL: {}", canvas.mp4_url);
+    /// # Ok(())
+    /// # }
+    /// ```
     #[tracing::instrument(skip(self, access_token), fields(track_uri = %track_uri))]
     pub async fn get_canvas(&mut self, track_uri: &str, access_token: &str) -> Result<Canvas> {
         tracing::debug!("Starting canvas fetch");

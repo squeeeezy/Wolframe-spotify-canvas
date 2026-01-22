@@ -12,16 +12,17 @@
 [English](README.md) | [Русский](README_RU.md)
 
 </div>
+
 This Rust library reverse-engineers the internal Spotify GraphQL Pathfinder API used by the official Spotify Web Player. It replaces the deprecated and non-functional REST API endpoints (`canvaz-cache`).
 
 ---
 
 ## 🚀 Features
 
--   **Pathfinder API:** Uses the correct `api-partner.spotify.com/pathfinder/v2` endpoint with Persisted Queries.
--   **Client Token Autonomy:** Automatically fetches, generates, and manages the required `client-token` (imitating a real Web Player session).
--   **Configurable:** Built to withstand frontend updates. You can override the Persisted Query Hash and Operation Name if Spotify changes them.
--   **Type-Safe:** Robust error handling for network failures, missing tokens, and API changes.
+- **Pathfinder API:** Uses the correct `api-partner.spotify.com/pathfinder/v2` endpoint with Persisted Queries.
+- **Client Token Autonomy:** Automatically fetches, generates, and manages the required `client-token` (imitating a real Web Player session).
+- **Configurable:** Built to withstand frontend updates. You can override the Persisted Query Hash and Operation Name if Spotify changes them.
+- **Type-Safe:** Robust error handling for network failures, missing tokens, and API changes.
 
 ## 📦 Installation
 
@@ -34,8 +35,8 @@ tokio = { version = "1", features = ["full", "macros"] }
 ```
 
 ### Minimum Supported Rust Version (MSRV)
-This crate requires Rust 1.75 or newer.
 
+This crate requires Rust **1.80** or newer.
 
 
 ## ⚡ Usage
