@@ -36,7 +36,7 @@ tokio = { version = "1", features = ["full", "macros"] }
 
 ### Minimum Supported Rust Version (MSRV)
 
-This crate requires Rust **1.80** or newer.
+This crate requires Rust **1.83** or newer.
 
 
 ## ⚡ Usage

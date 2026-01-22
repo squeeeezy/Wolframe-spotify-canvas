@@ -5,10 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-01-22
+
+### Changed
+- **MSRV:** Updated to **1.83** (required by `icu_*` dependencies via `idna`).
+
 ## [1.0.3] - 2026-01-22
 
 ### Changed
-- **MSRV:** Updated Minimum Supported Rust Version from 1.75 to **1.80** (required by `native-tls` 0.2.14+).
+- **MSRV:** Updated Minimum Supported Rust Version from 1.75 to 1.80 (required by `native-tls` 0.2.14+).
 - **CI:** Removed obsolete dependency downgrades, simplified workflow.
 - **Docs:** Unified README styling, synced Russian translation.
 

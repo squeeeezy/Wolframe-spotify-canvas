@@ -19,7 +19,7 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: 1.80.0  # MSRV check
+          toolchain: 1.83.0  # MSRV check
           components: clippy, rustfmt
 
       - name: Rustfmt

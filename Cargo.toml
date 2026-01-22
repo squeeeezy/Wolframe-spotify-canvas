@@ -1,8 +1,8 @@
 [package]
 name = "wolframe-spotify-canvas"
-version = "1.0.3"
+version = "1.0.4"
 edition = "2021"
-rust-version = "1.80"
+rust-version = "1.83"
 description = "A Rust library for fetching Spotify Canvas (looping visuals) using the internal GraphQL Pathfinder API."
 license = "MIT"
 repository = "https://github.com/squeeeezy/Wolframe-spotify-canvas"
