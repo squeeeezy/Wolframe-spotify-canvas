@@ -51,6 +51,12 @@ pub struct CanvasClient {
     config: CanvasConfig,
 }
 
+impl Default for CanvasClient {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CanvasClient {
     /// Create a new `CanvasClient` with default configuration and a new `reqwest::Client`.
     pub fn new() -> Self {
